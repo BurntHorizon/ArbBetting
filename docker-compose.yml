@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: arbuser
+      POSTGRES_PASSWORD: arbpass
+      POSTGRES_DB: odds_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+  odds_fetcher:
+    build: ./odds_fetcher
+    command: python main.py  # Placeholder, update as needed
+    volumes:
+      - ./odds_fetcher:/app
+    depends_on:
+      - db
+    env_file:
+      - .env
+  arb_engine:
+    build: ./arb_engine
+    command: python main.py  # Placeholder, update as needed
+    volumes:
+      - ./arb_engine:/app
+    depends_on:
+      - db
+    env_file:
+      - .env
+  frontend:
+    build: ./frontend
+    command: npm start  # Placeholder, update as needed
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+volumes:
+  pgdata: 
