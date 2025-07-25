@@ -1,8 +1,8 @@
-fastapi
-uvicorn
-psycopg2-binary
-sqlalchemy
-httpx
-apscheduler
-python-dotenv
-twilio 
+fastapi>=0.116.1
+uvicorn>=0.35.0
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.30
+httpx>=0.28.1
+apscheduler>=3.10.4
+python-dotenv>=1.0.1
+twilio>=9.0.4 

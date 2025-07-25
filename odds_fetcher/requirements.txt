@@ -2,8 +2,8 @@ fastapi
 uvicorn
 psycopg2-binary
 sqlalchemy
-httpx
-apscheduler
-python-dotenv
-twilio
-pandas 
+httpx>=0.28.1
+apscheduler>=3.10.4
+python-dotenv>=1.0.1
+twilio>=9.0.4
+pandas>=2.2.2 

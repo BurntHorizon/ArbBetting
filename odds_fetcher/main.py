@@ -15,7 +15,7 @@ TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 RECIPIENTS_CSV = os.getenv("RECIPIENTS_CSV", "recipients.csv")
 ODDS_API_BASE_URL = "https://api.the-odds-api.com/v4"
-UNIT_SIZE = float(os.getenv("UNIT_SIZE", 10))  # Default $10 per unit
+UNIT_SIZE = float(os.getenv("UNIT_SIZE", 10))
 
 if not ODDS_API_KEY:
     raise ValueError("ODDS_API_KEY not set in environment variables.")
@@ -28,9 +28,8 @@ def get_recipients():
         print(f"Recipients CSV '{RECIPIENTS_CSV}' not found.")
         return []
     df = pd.read_csv(RECIPIENTS_CSV)
-    # Expect columns: name, phone, unit
     df = df.dropna(subset=['phone'])
-    df['unit'] = df['unit'].fillna(10).astype(float)  # Default to $10 if missing
+    df['unit'] = df['unit'].fillna(10).astype(float)
     df['name'] = df['name'].fillna('Friend')
     return df[['name', 'phone', 'unit']].to_dict('records')
 
@@ -84,7 +83,7 @@ def format_odds_message(all_odds, unit_size, name, max_games=3):
                         msg += f"{outcome['name']}@{odds} (${bet_amt}) "
                 msg += "\n"
             msg += "\n"
-    return msg[:1500]  # SMS length limit
+    return msg[:1500]
 
 def send_sms(body, recipients):
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)

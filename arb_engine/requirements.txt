@@ -1,8 +1,1 @@
-fastapi
-uvicorn
-psycopg2-binary
-sqlalchemy
-httpx
-apscheduler
-python-dotenv
-twilio 
+# Add your dependencies here as needed 
