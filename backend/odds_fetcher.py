@@ -1,15 +1,13 @@
-import os
-import httpx
-from dotenv import load_dotenv
+async def fetch_sports():
+    url = f"{ODDS_API_BASE_URL}/sports/"
+    params = {"apiKey": ODDS_API_KEY}
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
 
-load_dotenv()
-
-ODDS_API_KEY = os.getenv("ODDS_API_KEY")
-NY_BOOKIES = os.getenv("NY_BOOKIES", "").split(",")
-
-ODDS_API_URL = "https://api.the-odds-api.com/v4/sports/basketball_nba/odds/"
-
-async def fetch_nba_odds():
+async def fetch_odds_for_sport(sport_key):
+    url = f"{ODDS_API_BASE_URL}/sports/{sport_key}/odds/"
     params = {
         "apiKey": ODDS_API_KEY,
         "regions": "us",
@@ -17,11 +15,17 @@ async def fetch_nba_odds():
         "oddsFormat": "decimal"
     }
     async with httpx.AsyncClient() as client:
-        resp = await client.get(ODDS_API_URL, params=params)
-        resp.raise_for_status()
-        games = resp.json()
-        # Filter bookies for NY
-        for game in games:
-            filtered_sites = [site for site in game["bookmakers"] if site["key"] in NY_BOOKIES]
-            game["bookmakers"] = filtered_sites
-        return games 
+        resp = await client.get(url, params=params)
+        if resp.status_code == 200:
+            return resp.json()
+        else:
+            return []
+
+async def fetch_all_sports_odds():
+    sports = await fetch_sports()
+    all_odds = {}
+    for sport in sports:
+        sport_key = sport["key"]
+        odds = await fetch_odds_for_sport(sport_key)
+        all_odds[sport_key] = odds
+    return all_odd
