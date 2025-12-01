@@ -1,13 +1,11 @@
 services:
   db:
     image: postgres:15
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-arbuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-arbpass}
       POSTGRES_DB: ${POSTGRES_DB:-odds_db}
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,9 +20,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+    restart: always
     ports:
       - "8000:8000"
     depends_on:
@@ -33,26 +30,41 @@ services:
     env_file:
       - .env
     environment:
-      - ENVIRONMENT=development
-      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - arb_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   odds_fetcher:
     build:
       context: ./odds_fetcher
       dockerfile: Dockerfile
     command: python main.py
-    volumes:
-      - ./odds_fetcher:/app
-      - ./recipients.csv:/app/recipients.csv:ro
+    restart: always
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - .env
+    volumes:
+      - ./recipients.csv:/app/recipients.csv:ro
     networks:
       - arb_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pgdata:
